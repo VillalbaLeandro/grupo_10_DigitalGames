@@ -56,6 +56,82 @@ databases:
 
 ---
 
+## ❌ Error: relation "products" does not exist (42P01)
+
+### Síntoma
+```
+SequelizeDatabaseError: relation "products" does not exist
+code: "42P01"
+```
+
+### Causa
+La base de datos PostgreSQL está conectada pero **las tablas no existen** todavía.
+
+### Solución
+
+#### Opción 1: Crear tablas automáticamente con Sequelize sync() (Rápido)
+
+**En Render Shell:**
+
+1. Ve a tu Web Service → **Shell** en el menú lateral
+2. Click en **"Launch Shell"**
+3. Ejecuta:
+
+```bash
+node -e "const db = require('./src/database/models'); db.sequelize.sync({ force: false }).then(() => { console.log('✅ Tablas creadas'); process.exit(0); }).catch(err => { console.error('❌ Error:', err); process.exit(1); });"
+```
+
+Espera a que termine (puede tardar 10-30 segundos).
+
+#### Opción 2: Migrar datos desde MySQL con pgloader
+
+Si tienes datos importantes en MySQL que quieres copiar:
+
+**En tu máquina local (WSL/Linux/Mac):**
+
+1. Instala pgloader:
+   ```bash
+   # WSL/Ubuntu/Debian
+   sudo apt-get install pgloader
+   
+   # macOS
+   brew install pgloader
+   ```
+
+2. Obtén la **External Database URL** desde Render:
+   - PostgreSQL Database → Connections → **External Database URL**
+
+3. Crea archivo `migrate.load`:
+   ```
+   LOAD DATABASE
+     FROM mysql://uuwdyns0qtehmspe:M38d2q2VrZsq9RfPGASC@bq7qyrfagcvxzvngubmv-mysql.services.clever-cloud.com:3306/bq7qyrfagcvxzvngubmv
+     INTO postgresql://[PEGA_AQUI_TU_EXTERNAL_DATABASE_URL]
+   
+   WITH include drop, create tables, create indexes, reset sequences
+   
+   CAST type datetime to timestamptz
+        drop default drop not null using zero-dates-to-null;
+   ```
+
+4. Ejecuta:
+   ```bash
+   pgloader migrate.load
+   ```
+
+Esto copiará **estructura + datos** automáticamente de MySQL a PostgreSQL.
+
+#### Verificar que las tablas fueron creadas
+
+**En Render Shell (PostgreSQL):**
+
+```bash
+psql $DATABASE_URL -c "\dt"
+```
+
+Deberías ver todas tus tablas listadas.
+
+---
+
 ## ⚠️ Warning: MemoryStore not designed for production
 
 ### Síntoma
