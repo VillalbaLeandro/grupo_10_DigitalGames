@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const {
   DB_HOST,
   DB_NAME,
@@ -24,11 +26,13 @@ module.exports = {
     "dialect": "mysql"
   },
   "production": {
-    "username": DB_USER,
-    "password": DB_PASSWORD,
-    "database": DB_NAME,
-    "host": DB_HOST,
-    "port": DB_PORT,
-    "dialect": "mysql"
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
   }
 };

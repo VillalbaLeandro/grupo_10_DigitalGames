@@ -1,0 +1,29 @@
+services:
+  # Web Service - Node.js Application
+  - type: web
+    name: digitalgames
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: digitalgames
+          property: port
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: digitalgames-db
+          property: connectionString
+
+databases:
+  # PostgreSQL Database
+  - name: digitalgames-db
+    plan: free
+    databaseName: digitalgames
+    user: digitalgames
